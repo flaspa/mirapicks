@@ -21,3 +21,9 @@ artifacts/*
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Emily clipping-book collection (generated; demo/ fixtures may be committed)
+data/brightdata/raw/
+data/brightdata/state/
+data/brightdata/clips/
+data/brightdata/fashion_test.json

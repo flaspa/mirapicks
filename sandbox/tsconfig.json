@@ -8,5 +8,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "files": ["scout.ts"]
+  "files": ["scout.ts", "qa.ts", "social.ts", "press.ts"]
 }

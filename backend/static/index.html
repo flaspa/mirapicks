@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mira Picks</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<style>
+  body { font-family: Georgia, serif; margin: 0; background: #f6f3ee; color: #1a1a1a; }
+  header { padding: 24px 40px; border-bottom: 1px solid #ddd; background: #fff; }
+  header h1 { margin: 0; letter-spacing: 2px; }
+  header p { margin: 4px 0 0; color: #666; font-style: italic; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 40px; }
+  .brief { background: #fff; border: 1px solid #ddd; padding: 18px 20px; }
+  .brief h2 { margin: 0 0 12px; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #777; font-family: sans-serif; }
+  .brief .row { display: flex; align-items: center; gap: 14px; }
+  .brief label { font-family: sans-serif; font-size: 13px; color: #555; white-space: nowrap; }
+  .brief .row input { flex: 1; }
+  .demo-link { margin: 8px 2px 0; text-align: right; font-family: sans-serif; font-size: 12px; }
+  .demo-link a { color: #999; text-decoration: none; cursor: pointer; }
+  .demo-link a:hover { color: #555; text-decoration: underline; }
+  .demo { margin-top: 10px; background: #fff; border: 1px dashed #c9c2b8; padding: 12px 16px; font-family: sans-serif; font-size: 13px; }
+  .demo .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .demo h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8a7a62; }
+  .demo label { cursor: pointer; }
+  .demo button { padding: 8px 16px; font-size: 14px; }
+  .demo .note { color: #777; font-size: 12px; }
+  details.evidence { margin-bottom: 14px; padding: 0; }
+  details.evidence > summary { list-style: none; cursor: pointer; padding: 14px 20px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  details.evidence > summary::-webkit-details-marker { display: none; }
+  details.evidence > summary::before { content: "\25B8"; color: #8a7a62; font-size: 14px; transition: transform .15s; }
+  details.evidence[open] > summary::before { transform: rotate(90deg); }
+  details.evidence > summary h2 { margin: 0; }
+  details.evidence > summary .ev-sum { margin: 0; font-family: Georgia, serif; font-size: 16px; color: #1a1a1a; }
+  details.evidence > .ev-body { padding: 0 20px 18px; border-top: 1px solid #eee; }
+  details.evidence > summary:focus-visible { outline: 2px solid #c08a2d; outline-offset: -2px; }
+  .pd-run { margin: 12px 0; padding: 12px; background: #faf8f5; border: 1px solid #eee; }
+  .pd-run h4, .pd-all h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8a7a62; }
+  .pd-sel { padding: 6px 0; border-top: 1px solid #eee; }
+  .pd-sel:first-of-type { border-top: 0; }
+  .pd-sel .m, .pd-src .m { color: #777; font-size: 12px; }
+  .pd-src { border: 1px solid #eee; padding: 10px; font-size: 12px; line-height: 1.45; background: #fff; }
+  .pd-src b { font-size: 13px; }
+  .pd-src a, .pd-sel a { color: #8a5a2d; }
+  .clipbook { margin-bottom: 20px; font-family: sans-serif; font-size: 13px; }
+  .clipbook p { margin: 4px 0; }
+  .cb-summary { font-family: Georgia, serif; font-size: 18px; }
+  .cb-prov { color: #777; font-size: 12px; }
+  .cb-flow { margin: 10px 0; color: #555; font-size: 12px; letter-spacing: .02em; }
+  .cb-flow b { color: #1a1a1a; }
+  .cb-queries { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .cb-chip { border: 1px solid #ddd; background: #faf8f5; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+  .cb-chip span { color: #999; margin-left: 4px; }
+  .cb-link { color: #8a7a62; cursor: pointer; font-size: 12px; }
+  .cb-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 10px 0; }
+  .clip { border: 1px solid #eee; padding: 10px; font-size: 12px; line-height: 1.45; background: #fff; }
+  .clip b { font-size: 13px; }
+  .clip q { display: block; color: #333; margin: 4px 0; }
+  .clip .m { color: #777; }
+  .clip a { color: #8a5a2d; }
+  input { padding: 10px 12px; font-size: 15px; border: 1px solid #bbb; min-width: 0; }
+  button { padding: 12px 24px; font-size: 16px; background: #1a1a1a; color: #fff; border: 0; cursor: pointer; }
+  button:disabled { opacity: .5; }
+  .steps { display: flex; gap: 12px; margin: 24px 0; font-family: sans-serif; }
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+  .stage img.portrait { width: 80px; height: 80px; object-fit: contain; border: 0; border-radius: 10px; }
+  .step { align-self: stretch; flex: 1; padding: 14px; background: #fff; border: 2px solid #ddd; }
+  .step b { display: block; font-size: 18px; }
+  .step small { color: #777; }
+  .step.active { border-color: #c08a2d; animation: pulse 1.2s infinite; }
+  .step.done { border-color: #2d7a46; }
+  .step.error { border-color: #b3261e; }
+  @keyframes pulse { 50% { background: #fbf3e4; } }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: #fff; padding: 20px; border: 1px solid #ddd; }
+  .card h2 { margin-top: 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #777; font-family: sans-serif; }
+  img { width: 100%; border: 1px solid #ddd; }
+  ul { padding-left: 18px; margin: 4px 0 12px; }
+  h3 { margin: 8px 0 2px; font-family: sans-serif; font-size: 13px; }
+  .decision { font-size: 44px; font-weight: bold; letter-spacing: 4px; }
+  .FEATURE { color: #2d7a46; } .WATCH { color: #c08a2d; } .PASS { color: #b3261e; }
+  .err { color: #b3261e; font-family: sans-serif; }
+  .hidden { display: none; }
+  @media (max-width: 720px) {
+    .brief .row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .steps { flex-wrap: wrap; } .stage { flex: 1 1 140px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>MIRA PICKS</h1>
+  <p>Miranda assigns. Andy reads the fashion press. Emily reads social culture. Nigel assesses. Miranda decides.</p>
+</header>
+<main>
+  <!-- Product URL, social URL and trend query remain optional API inputs (POST /api/runs), not console fields. -->
+  <form id="f" class="brief">
+    <div class="row">
+      <label for="topic">Editorial topic</label>
+      <input id="topic" type="text" maxlength="80" placeholder="Blank = Miranda chooses, e.g. streetwear / Gen Z style">
+      <button id="go">Scout it</button>
+    </div>
+  </form>
+  <!-- Demo Publish: authorised server-side (PIN -> short-lived HttpOnly cookie). Public runs never publish. -->
+  <div class="demo-link"><a id="demo-toggle">Demo publish</a></div>
+  <div class="demo hidden" id="demo-unlock">
+    <form id="demo-pin-form" class="row">
+      <input id="demo-pin" type="password" autocomplete="off" placeholder="Demo PIN" style="max-width:160px">
+      <button>Unlock</button><span class="note" id="demo-msg"></span>
+    </form>
+  </div>
+  <div class="demo hidden" id="demo-panel">
+    <h4>Demo mode &middot; Demo publishing enabled</h4>
+    <div class="row" id="demo-presets"></div>
+    <div class="row" style="margin-top:10px"><button id="demo-go">Run Demo Publish</button>
+      <span class="note">Cached social evidence (Emily&rsquo;s demo clip set) &middot; live Andy, Nigel and Miranda &middot; publishes only if Miranda returns FEATURE</span>
+      <a class="note" id="demo-lock" style="cursor:pointer;margin-left:auto">Lock</a></div>
+  </div>
+
+  <div class="steps">
+    <div class="stage"><img class="portrait" src="/static/characters/miranda.png" alt="Miranda">
+      <div class="step" id="s-assignment"><b>Miranda &mdash; Assignment</b><small>What are we covering? &middot; glm-5.3</small></div>
+    </div>
+    <div class="stage"><img class="portrait" src="/static/characters/andy.png" alt="Andy">
+      <div class="step" id="s-andy"><b>Andy</b><small>Product + Fashion Press Scout &middot; nemotron-3-nano</small><small id="s-andy-phase" style="display:block;color:#c08a2d"></small></div>
+    </div>
+    <div class="stage"><img class="portrait" src="/static/characters/emily.png" alt="Emily">
+      <div class="step" id="s-emily"><b>Emily</b><small>Social Scout &middot; qwen3.8-flash-next</small></div>
+    </div>
+    <div class="stage"><img class="portrait" src="/static/characters/nigel.png" alt="Nigel">
+      <div class="step" id="s-nigel"><b>Nigel</b><small>Fashion Director &middot; deepseek-v4-flash-0731</small></div>
+    </div>
+    <div class="stage"><img class="portrait" src="/static/characters/miranda.png" alt="Miranda">
+      <div class="step" id="s-mira"><b>Miranda &mdash; Final verdict</b><small>Is this worth publishing? &middot; glm-5.3</small></div>
+    </div>
+  </div>
+  <p id="error" class="err"></p>
+
+  <details class="card evidence clipbook" id="pressdesk">
+    <summary><h2>Andy&rsquo;s press desk</h2><p class="ev-sum" id="pd-summary">Loading&hellip;</p></summary>
+    <div class="ev-body">
+      <p class="cb-prov" id="pd-prov"></p>
+      <div class="pd-run" id="pd-run"><h4>Selected for this assignment</h4><p class="m" id="pd-run-sum">No assignment researched in this session yet.</p><div id="pd-run-list"></div></div>
+      <div class="pd-all"><h4 id="pd-all-h">Curated publications</h4><div class="cb-list" id="pd-sources"></div></div>
+    </div>
+  </details>
+
+  <details class="card evidence clipbook" id="clipbook">
+    <summary><h2>Emily&rsquo;s clipping book</h2><p class="ev-sum cb-summary" id="cb-summary">Loading&hellip;</p></summary>
+    <div class="ev-body">
+    <p class="cb-prov" id="cb-prov"></p>
+    <div class="cb-flow" id="cb-flow"></div>
+    <div class="cb-queries" id="cb-queries"></div>
+    <a class="cb-link" id="cb-toggle">Browse clipping book &darr;</a>
+    <div id="cb-browse" class="hidden">
+      <p style="margin-top:10px"><select id="cb-q"><option value="">All searches</option></select>
+        <span class="m" id="cb-count" style="margin-left:8px;color:#777"></span></p>
+      <div class="cb-list" id="cb-list"></div>
+      <p><button type="button" id="cb-prev" style="padding:6px 14px;font-size:13px">&larr; Previous</button>
+         <button type="button" id="cb-next" style="padding:6px 14px;font-size:13px">Next &rarr;</button></p>
+    </div>
+    </div>
+  </details>
+
+  <div class="card hidden" id="assignment" style="margin-bottom:20px">
+    <h2>Miranda &mdash; Editorial assignment</h2>
+    <h3>Topic</h3><p id="as-topic"></p>
+    <h3>Editorial question</h3><p id="as-question" style="font-size:20px"></p>
+    <h3>Angle</h3><p id="as-angle"></p>
+    <h3>Keywords</h3><p id="as-keywords"></p>
+  </div>
+
+  <div class="card hidden" id="publish" style="margin-bottom:20px">
+    <h2>Developer &rarr; Technical QA &rarr; Publish</h2>
+    <p id="pub-phase" style="font-size:20px"></p>
+    <p id="pub-link"></p>
+  </div>
+
+  <div class="card hidden" id="mira" style="margin-bottom:20px">
+    <h2>Miranda &mdash; Final verdict</h2>
+    <div id="m-decision" class="decision"></div>
+    <h3 id="m-headline" style="font-size:20px;font-family:Georgia"></h3>
+    <p id="m-rationale"></p>
+    <h3>Does the research support the assignment?</h3><p id="m-assign"></p>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card hidden" id="andy">
+        <h2>Andy's evidence</h2>
+        <div id="a-page">
+        <img id="shot" alt="Page screenshot">
+        <h3>Title</h3><p id="a-title"></p>
+        <h3>Product</h3><p id="a-product"></p>
+        <h3>Description</h3><p id="a-desc"></p>
+        <h3>Source</h3><p id="a-url" style="word-break:break-all"></p>
+        </div>
+        <div id="press" class="hidden" style="border-top:1px solid #ddd;margin-top:14px;padding-top:10px">
+          <h2 style="margin-bottom:6px">Andy &mdash; Fashion press scout</h2>
+          <p id="p-phase" style="font-family:sans-serif;font-size:13px;color:#777"></p>
+          <h3>Selected sources</h3><ul id="p-sources" style="list-style:none;padding-left:0;font-family:sans-serif;font-size:13px"></ul>
+          <h3>Research</h3><p id="p-count"></p>
+          <h3>Press signal</h3><p id="p-signal"></p>
+          <h3>Confidence</h3><p id="p-conf"></p>
+        </div>
+      </div>
+      <div class="card hidden" id="emily" style="margin-top:20px">
+        <h2>Emily's social evidence</h2>
+        <p id="e-status" style="font-family:sans-serif;font-size:13px"></p>
+        <img id="e-shot" alt="Social page screenshot" class="hidden">
+        <h3>Signal</h3><p id="e-signal"></p>
+        <h3>Aesthetic</h3><p id="e-aesthetic"></p>
+        <h3>Observed</h3><ul id="e-evidence"></ul>
+        <h3 id="e-posts-h" class="hidden">Representative posts</h3><ul id="e-posts"></ul>
+        <h3>Confidence</h3><p id="e-conf"></p>
+        <h3 id="e-book-h" class="hidden">Clipping book</h3><p id="e-book" style="font-family:sans-serif;font-size:13px"></p>
+        <h3 id="e-clips-h" class="hidden">Selected evidence</h3><div id="e-clips" class="cb-list"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card hidden" id="nigel">
+        <h2>Nigel's assessment</h2>
+        <p id="n-summary"><i></i></p>
+        <h3>ANSWER TO THE EDITORIAL QUESTION</h3><p id="n-answer"></p>
+        <h3>WEB / PRODUCT EVIDENCE</h3><ul id="n-web"></ul>
+        <h3>FASHION PRESS EVIDENCE</h3><ul id="n-press"></ul>
+        <h3>SOCIAL / TREND EVIDENCE</h3><ul id="n-social"></ul>
+        <h3>AGREEMENTS</h3><ul id="n-agree"></ul>
+        <h3>CONTRADICTIONS</h3><ul id="n-contra"></ul>
+        <h3>FOR</h3><ul id="n-for"></ul>
+        <h3>AGAINST</h3><ul id="n-against"></ul>
+        <h3>UNCERTAINTIES</h3><ul id="n-unc"></ul>
+        <h3>CONFIDENCE</h3><p id="n-conf"></p>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const text = (id, v) => { $(id).textContent = v ?? ""; };
+const list = (id, items) => {
+  const arr = Array.isArray(items) ? items : items ? [String(items)] : [];
+  $(id).replaceChildren(...arr.map((t) => { const li = document.createElement("li"); li.textContent = t; return li; }));
+};
+const ORDER = ["assignment", "andy", "emily", "nigel", "mira"];
+
+function render(run) {
+  const idx = run.stage === "done" || run.stage === "publishing" ? ORDER.length : ORDER.indexOf(run.stage);
+  if (run.assignment) {
+    const a = run.assignment;
+    $("assignment").classList.remove("hidden");
+    text("as-topic", a.topic + (a.source === "fallback" ? " (default assignment)" : ""));
+    text("as-question", a.editorial_question); text("as-angle", a.angle);
+    text("as-keywords", (a.keywords || []).join(" · "));
+  }
+  ORDER.forEach((s, i) => {
+    const el = $("s-" + s);
+    el.className = "step" + (i < idx ? " done" : i === idx ? (run.stage === "error" ? " error" : " active") : "");
+  });
+  if (run.stage === "error") {
+    const failed = !run.assignment ? "assignment" : !run.andy ? "andy" : !run.emily ? "emily" : !run.nigel ? "nigel" : "mira";
+    $("s-" + failed).className = "step error";
+  }
+  text("error", run.error);
+
+  if (run.andy) {
+    const ev = run.andy.evidence;  // null on topic-only runs: no product page was scouted
+    $("andy").classList.remove("hidden");
+    $("a-page").classList.toggle("hidden", !ev);
+    if (ev) {
+      const p = (ev.products || [])[0];
+      if ($("shot").getAttribute("src") !== run.andy.screenshot) $("shot").src = run.andy.screenshot;
+      text("a-title", ev.title);
+      text("a-product", p ? `${p.name || ""} · ${p.brand || ""} · ${p.price || "?"} ${p.currency || ""} · ${(p.availability || "").replace("https://schema.org/", "")}` : "No structured product data");
+      text("a-desc", ev.description);
+      text("a-url", ev.url);
+    }
+    const pg = run.andy.press_progress || {}, pr = run.andy.press || null, it = (pr && pr.interpretation) || {};
+    if (pg.phase || pr) {
+      $("press").classList.remove("hidden");
+      const phase = pr && !pr.interpretation && pr.status !== "success" ? `Press research unavailable${pr.error ? " · " + pr.error : ""} · Nigel continues with product evidence` : (pg.phase || "");
+      text("p-phase", `Assignment: ${(run.assignment || {}).topic || "—"} · ${phase}${pg.selection_method === "fallback" ? " · keyword-fallback ranking" : ""}`);
+      text("s-andy-phase", run.stage === "andy" ? pg.phase || "" : "");
+      const ICON = { reading: "…", success: "✓", blocked: "○", no_relevant_evidence: "○", error: "○" };
+      const LABEL = { reading: "reading", success: "", blocked: "blocked / unavailable", no_relevant_evidence: "no relevant evidence", error: "unavailable" };
+      $("p-sources").replaceChildren(...(pg.sources || []).map((s) => {
+        const li = document.createElement("li"); li.style.margin = "4px 0";
+        li.append(document.createTextNode(`${ICON[s.status] || "○"} ${s.name} — ${s.reason || ""}${LABEL[s.status] ? " · " + LABEL[s.status] : ""}`));
+        if (s.article_url && /^https:\/\//.test(s.article_url)) {
+          const a = document.createElement("a"); a.href = s.article_url; a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = s.article_title || "article"; li.append(document.createElement("br"), document.createTextNode("   ↳ "), a);
+        }
+        return li;
+      }));
+      text("p-count", pg.sources ? `${pg.usable || 0} of ${pg.sources.length} sources usable` : "—");
+      const sig = (it.press_signals || [])[0];
+      text("p-signal", it.press_consensus || (sig ? `${sig.signal} (${sig.strength})` : "—"));
+      text("p-conf", typeof it.confidence === "number" ? it.confidence.toFixed(2) : "—");
+    }
+  }
+  if (run.andy) renderPressRun(run.andy);
+  if (run.emily) {
+    const em = run.emily, it = em.interpretation || {};
+    $("emily").classList.remove("hidden");
+    let label = { success: "Evidence gathered", blocked: "Blocked by platform", skipped: "Skipped", empty: "No usable evidence", error: "Unavailable" }[em.status] || em.status;
+    if (em.mode === "clipbook") label = em.demo_dataset
+      ? `${label} · cached demo clip set (${em.demo_dataset}) · ${em.clips_used || 0} of ${em.clips_searched || 0} clips matched · no live Bright Data`
+      : `${label} · TikTok clipping book · ${em.clips_used || 0} of ${em.clips_searched || 0} clips matched`;
+    if (em.mode === "trend") label = `${label} · TikTok via Bright Data · “${em.query}” · ${em.sample_size || 0} posts sampled`;
+    text("e-status", `${label}${em.platform ? " · " + em.platform : ""}${em.status !== "success" && em.error ? " · " + em.error : ""}${em.status !== "success" ? " · Nigel continues with Andy's evidence" : ""}`);
+    if (em.screenshot) { $("e-shot").classList.remove("hidden"); if ($("e-shot").getAttribute("src") !== em.screenshot) $("e-shot").src = em.screenshot; }
+    const ts = it.trend_signal || (it.trend_signals || [])[0] || {};
+    text("e-signal", ts.signal ? `${ts.signal} (${ts.strength || "?"})` : "—");
+    text("e-aesthetic", (it.aesthetic_signal || {}).description || "—");
+    list("e-evidence", (ts.evidence || []).slice(0, 4).map((x) => typeof x === "string" ? x : x.observation));
+    const posts = (it.representative_posts || []).filter((p) => /^https:\/\/www\.tiktok\.com\//.test(p.url || "")).slice(0, 3);
+    $("e-posts-h").classList.toggle("hidden", !posts.length);
+    $("e-posts").replaceChildren(...posts.map((p) => { const li = document.createElement("li"), a = document.createElement("a");
+      a.href = p.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = (p.description || p.url).slice(0, 90);
+      li.append(a, document.createTextNode(p.observed_engagement ? ` — ${p.observed_engagement}` : "")); return li; }));
+    if (it.aesthetic_signals) text("e-aesthetic", it.aesthetic_signals.slice(0, 2).join(" · "));
+    text("e-conf", typeof it.confidence === "number" ? it.confidence.toFixed(2) : "—");
+    const fromBook = em.mode === "clipbook" && em.clips_searched;
+    $("e-book-h").classList.toggle("hidden", !fromBook);
+    text("e-book", fromBook ? `${em.clips_searched} clips searched${em.demo_dataset ? " (cached demo clip set)" : ""} → ${em.clips_used || 0} relevant clips selected for this assignment` : "");
+    const ev = (em.evidence_clips || []).filter((c) => c.url);
+    $("e-clips-h").classList.toggle("hidden", !ev.length);
+    $("e-clips").replaceChildren(...ev.map(clipEl));
+    if (fromBook) setFlow(em.clips_searched, em.clips_used, ts.signal || it.trend_summary);
+  }
+  if (run.nigel) {
+    const n = run.nigel;
+    $("nigel").classList.remove("hidden");
+    text("n-summary", n.summary);
+    text("n-answer", n.answer_to_question || "—");
+    list("n-web", n.web_evidence); list("n-press", n.fashion_press_evidence); list("n-social", n.social_evidence);
+    list("n-agree", n.agreements); list("n-contra", n.contradictions);
+    list("n-for", n.for); list("n-against", n.against); list("n-unc", n.uncertainties);
+    text("n-conf", (n.confidence || "").toUpperCase());
+  }
+  if (run.mira) {
+    const m = run.mira;
+    $("mira").classList.remove("hidden");
+    text("m-decision", m.decision);
+    $("m-decision").className = "decision " + m.decision;
+    text("m-headline", m.headline);
+    text("m-rationale", m.rationale);
+    text("m-assign", m.assignment_verdict || "—");
+  }
+  if (run.demo) {  // Demo Publish runs only
+    $("publish").classList.remove("hidden");
+    const pb = run.publish || {};
+    text("pub-phase", pb.phase || (run.mira ? "" : "Waiting for Miranda's verdict…"));
+    $("pub-link").replaceChildren();
+    if (pb.published && pb.url && /^https:\/\/www\.mirapicks\.com\//.test(pb.url)) {
+      const a = document.createElement("a"); a.href = pb.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = pb.url;
+      $("pub-link").append(document.createTextNode(pb.updated_existing ? "Story updated in place (same product, same page): " : "New story: "), a);
+    }
+  }
+}
+
+// ---------------- Emily's clipping book (read-only) ----------------
+const fmtN = (n) => n == null ? null : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M" : n >= 1e3 ? Math.round(n / 1e3) + "K" : String(n);
+function clipEl(c) {
+  const d = document.createElement("div"); d.className = "clip";
+  const b = document.createElement("b"); b.textContent = c.creator ? "@" + c.creator : "TikTok post";
+  const q = document.createElement("q"); q.textContent = (c.description || "").slice(0, 140) + ((c.description || "").length > 140 ? "…" : "");
+  const m = document.createElement("div"); m.className = "m";
+  m.textContent = [fmtN(c.plays) && fmtN(c.plays) + " views", fmtN(c.likes) && fmtN(c.likes) + " likes", fmtN(c.comments) && fmtN(c.comments) + " comments"].filter(Boolean).join(" · ");
+  const src = document.createElement("div"); src.className = "m"; src.textContent = "Source: " + (c.source_queries || []).filter(Boolean).join(", ");
+  d.append(b, q, m, src);
+  if (c.url && /^https:\/\/www\.tiktok\.com\//.test(c.url)) {
+    const a = document.createElement("a"); a.href = c.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = "View TikTok ↗";
+    d.append(a);
+  }
+  return d;
+}
+let CB = { total: 0, offset: 0, query: "" };
+function setFlow(total, selected, signal) {
+  $("cb-flow").innerHTML = "";
+  const parts = [[`${total}`, " collected clips"], ["", "Miranda assignment"], [selected == null ? "up to 25" : `${selected}`, " relevant clips selected"],
+    ["", signal ? `Emily social signal: ${signal}` : "Emily social signal"]];
+  parts.forEach(([n, t], i) => { if (i) $("cb-flow").append(document.createTextNode("  →  "));
+    if (n) { const b = document.createElement("b"); b.textContent = n; $("cb-flow").append(b); }
+    $("cb-flow").append(document.createTextNode(t)); });
+}
+async function loadClipbook() {
+  const s = await (await fetch("/api/clips/summary")).json();
+  const col = s.collection || {}, nq = s.queries.length, nd = Object.keys(s.demo_datasets || {}).length;
+  text("cb-summary", `${s.total_unique_clips} unique TikTok posts · ${nq} fashion searches` +
+    (col.searches ? ` · Bright Data collection ${col.finished ? "complete" : `${col.complete}/${col.searches} searches done`}` : "") +
+    (nd ? ` · ${nd} cached demo sets` : ""));
+  text("cb-prov", `Public TikTok posts collected through Bright Data across ${nq} fashion searches. Emily retrieves a relevant subset for each editorial assignment. Not a sample of all of TikTok.`);
+  setFlow(s.total_unique_clips, null, null);
+  $("cb-queries").replaceChildren(...s.queries.map((q) => { const c = document.createElement("span"); c.className = "cb-chip";
+    c.append(document.createTextNode(q.query)); const n = document.createElement("span"); n.textContent = q.count; c.append(n);
+    c.onclick = () => { $("cb-browse").classList.remove("hidden"); $("cb-q").value = q.query; CB.query = q.query; CB.offset = 0; loadClips(); };
+    return c; }));
+  $("cb-q").replaceChildren(new Option("All searches", ""), ...s.queries.map((q) => new Option(`${q.query} (${q.count})`, q.query)));
+  $("cb-queries").title = s.counting_note || "";
+}
+async function loadClips() {
+  const r = await (await fetch(`/api/clips?limit=16&offset=${CB.offset}` + (CB.query ? `&query=${encodeURIComponent(CB.query)}` : ""))).json();
+  CB.total = r.total;
+  text("cb-count", r.total ? `${r.offset + 1}–${Math.min(r.offset + r.limit, r.total)} of ${r.total} · most-viewed first` : "No clips");
+  $("cb-list").replaceChildren(...r.clips.map(clipEl));
+  $("cb-prev").disabled = CB.offset === 0; $("cb-next").disabled = CB.offset + 16 >= r.total;
+}
+$("cb-toggle").onclick = () => { const h = $("cb-browse").classList.toggle("hidden"); if (!h) loadClips(); };
+$("cb-q").onchange = () => { CB.query = $("cb-q").value; CB.offset = 0; loadClips(); };
+$("cb-prev").onclick = () => { CB.offset = Math.max(0, CB.offset - 16); loadClips(); };
+$("cb-next").onclick = () => { CB.offset += 16; loadClips(); };
+loadClipbook();
+
+// ---------------- Andy's press desk (read-only registry + this run's selection, from data Andy already returned) ------
+const safeHttps = (u) => typeof u === "string" && /^https:\/\//.test(u);
+function extLink(href, label) { const a = document.createElement("a"); a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = label; return a; }
+async function loadPressDesk() {
+  const r = await (await fetch("/api/press/sources")).json();
+  const pa = r.per_assignment || {};
+  text("pd-summary", `${r.total_sources} curated fashion publications · dynamically selected per assignment`);
+  text("pd-prov", `Curated fashion publications used by Andy. For each Miranda assignment, Nemotron selects approximately ${pa.min || 4}–${pa.max || 6} relevant sources before Andy reads them in the sandbox.`);
+  text("pd-all-h", `Curated publications (${r.total_sources})`);
+  $("pd-sources").replaceChildren(...r.sources.map((src) => {
+    const d = document.createElement("div"); d.className = "pd-src";
+    const b = document.createElement("b"); b.textContent = src.name;
+    const p = document.createElement("div"); p.textContent = src.description || "";
+    const n = document.createElement("div"); n.className = "m"; n.textContent = src.access_note || "";
+    d.append(b, p, n);
+    if (safeHttps(src.url)) d.append(extLink(src.url, "Open publication ↗"));
+    return d;
+  }));
+}
+function renderPressRun(andy) {
+  const pg = (andy && andy.press_progress) || {}, pr = (andy && andy.press) || {}, it = pr.interpretation || {};
+  const srcs = pg.sources || [];
+  if (!srcs.length) return;
+  const usable = srcs.filter((x) => x.status === "success").length, articles = srcs.filter((x) => safeHttps(x.article_url)).length;
+  text("pd-run-sum", `${srcs.length} sources selected · ${usable} usable · ${articles} relevant article${articles === 1 ? "" : "s"} followed` +
+    (typeof it.confidence === "number" ? ` · press confidence ${it.confidence.toFixed(2)}` : "") +
+    (pg.selection_method === "fallback" ? " · keyword-fallback ranking" : "") + (pg.phase && pg.phase !== "Complete" ? ` · ${pg.phase}` : ""));
+  const LABEL = { success: "success", blocked: "blocked / unavailable", no_relevant_evidence: "no relevant evidence", error: "unavailable", reading: "reading…" };
+  $("pd-run-list").replaceChildren(...srcs.map((x) => {
+    const d = document.createElement("div"); d.className = "pd-sel";
+    const b = document.createElement("b"); b.textContent = `${x.status === "success" ? "✓" : x.status === "reading" ? "…" : "○"} ${x.name}`;
+    const why = document.createElement("div"); why.className = "m"; why.textContent = [x.reason, LABEL[x.status] || x.status].filter(Boolean).join(" · ");
+    d.append(b, why);
+    if (safeHttps(x.article_url)) {
+      const art = document.createElement("div"); art.textContent = "Article: " + (x.article_title || x.article_url) + " ";
+      art.append(extLink(x.article_url, "Read article ↗")); d.append(art);
+    } else if (x.status === "success") {
+      const h = document.createElement("div"); h.className = "m"; h.textContent = "Homepage/section evidence (no single article followed)"; d.append(h);
+    }
+    return d;
+  }));
+  $("pd-summary").textContent = $("pd-summary").textContent.split(" · this run:")[0] + ` · this run: ${srcs.length} selected, ${usable} usable`;
+}
+loadPressDesk();
+
+function resetPanels() {
+  text("pd-run-sum", "Waiting for Andy's selection for this assignment…"); $("pd-run-list").replaceChildren();
+  $("pd-summary").textContent = $("pd-summary").textContent.split(" · this run:")[0];
+  ["assignment", "andy", "emily", "nigel", "mira", "publish"].forEach((id) => $(id).classList.add("hidden"));
+  $("e-shot").classList.add("hidden"); $("e-shot").removeAttribute("src");
+  $("shot").removeAttribute("src"); $("press").classList.add("hidden"); text("s-andy-phase", "");
+  text("error", "");
+}
+
+function pollRun(id, buttons) {
+  const poll = async () => {
+    const run = await (await fetch("/api/runs/" + id)).json();
+    render(run);
+    if (run.stage === "done" || run.stage === "error") { buttons.forEach((b) => { b.disabled = false; }); return; }
+    setTimeout(poll, 1000);
+  };
+  poll();
+}
+
+async function refreshDemo() {
+  const st = await (await fetch("/api/demo/status")).json();
+  $("demo-panel").classList.toggle("hidden", !st.enabled);
+  if (st.enabled) {
+    $("demo-unlock").classList.add("hidden");
+    $("demo-presets").replaceChildren(...st.presets.map((p, i) => {
+      const l = document.createElement("label"), r = document.createElement("input");
+      r.type = "radio"; r.name = "demo-preset"; r.value = p.id; r.checked = i === 0;
+      l.append(r, document.createTextNode(" " + p.label)); return l;
+    }));
+  }
+  return st;
+}
+
+$("demo-toggle").onclick = async () => {
+  const st = await refreshDemo();
+  if (!st.enabled) {
+    $("demo-unlock").classList.toggle("hidden");
+    text("demo-msg", st.configured ? "" : "Demo publishing is not configured on this server.");
+  }
+};
+$("demo-pin-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const res = await fetch("/api/demo/unlock", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pin: $("demo-pin").value }) });
+  $("demo-pin").value = "";
+  if (!res.ok) { text("demo-msg", (await res.json()).detail || "Unlock failed."); return; }
+  text("demo-msg", ""); await refreshDemo();
+};
+$("demo-lock").onclick = async () => { await fetch("/api/demo/lock", { method: "POST" }); $("demo-panel").classList.add("hidden"); };
+$("demo-go").onclick = async () => {
+  const preset = (document.querySelector("input[name=demo-preset]:checked") || {}).value;
+  resetPanels();
+  $("go").disabled = true; $("demo-go").disabled = true;
+  const res = await fetch("/api/demo/runs", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ preset }) });
+  const body = await res.json();
+  if (!res.ok) { text("error", body.detail || "Demo publish failed to start."); $("go").disabled = false; $("demo-go").disabled = false;
+    if (res.status === 401) refreshDemo(); return; }
+  pollRun(body.id, [$("go"), $("demo-go")]);
+};
+refreshDemo();
+
+$("f").onsubmit = async (e) => {
+  e.preventDefault();
+  resetPanels();
+  $("go").disabled = true;
+  const res = await fetch("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic: $("topic").value.trim() || null }) });
+  const { id } = await res.json();
+  pollRun(id, [$("go")]);
+};
+
+</script>
+</body>
+</html>

@@ -16,9 +16,9 @@ import { statSync } from "node:fs";
 
 const OUT_DIR = process.env.SCOUT_OUT_DIR ?? "/out";
 const SCREENSHOT_NAME = "screenshot.png";
-const NAV_TIMEOUT_MS = 25_000;
+const NAV_TIMEOUT_MS = 45_000;
 const SETTLE_MS = 2_000;
-const HARD_DEADLINE_MS = 50_000;
+const HARD_DEADLINE_MS = 110_000; // two navigation attempts plus extraction
 const MAX_STDOUT_BYTES = 64 * 1024;
 
 // Per-field bounds. Keep in sync with the orchestrator's schema.
@@ -196,7 +196,14 @@ async function inspect(url: string): Promise<ScoutEvidence> {
     });
 
     const page = await context.newPage();
-    const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+    const nav = () => page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+    let response;
+    try {
+      response = await nav();
+    } catch (err) {
+      if (!(err instanceof Error && err.name === "TimeoutError")) throw err;
+      response = await nav(); // one retry on timeout only
+    }
     await page.waitForLoadState("networkidle", { timeout: SETTLE_MS * 3 }).catch(() => undefined);
     await page.waitForTimeout(SETTLE_MS);
 

@@ -1,0 +1,11 @@
+{
+  "purpose": "Authenticated Demo Publish presets only. Each pairs a topic with a known-good product page (for real imagery) and a cached social dataset. Normal runs never use this file; Andy still selects publications dynamically.",
+  "presets": [
+    {"id": "runway_couture", "label": "Runway / Couture", "topic": "runway couture",
+     "url": "https://www.khaite.com/products/sarmine-jacket-in-black", "dataset": "runway_couture.json"},
+    {"id": "streetwear_genz", "label": "Streetwear / Gen Z", "topic": "Gen Z style: ballet flats and Mary Janes",
+     "url": "https://rothys.com/products/womens-cruiser-mary-jane-revelvet-black", "dataset": "streetwear_genz.json"},
+    {"id": "budget_shopping", "label": "Budget Shopping", "topic": "budget-friendly shopping",
+     "url": "https://us.princesspolly.com/products/vanla-trouser-beige", "dataset": "budget_shopping.json"}
+  ]
+}

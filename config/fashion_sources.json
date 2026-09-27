@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "purpose": "Curated fashion-source registry for Andy. Given Mira's editorial assignment, Andy should rank this registry and consult only the most relevant sources.",
+  "selection_guidance": {
+    "default_sources_per_assignment": 5,
+    "min_sources_per_assignment": 4,
+    "max_sources_per_assignment": 6,
+    "instruction": "Select sources dynamically from the full registry based on Mira's topic, editorial question, and keywords. Do not use fixed editorial categories."
+  },
+  "verification": {
+    "checked_on": "2026-09-27",
+    "note": "URLs were checked against current web results. Some official sites intentionally return subscription, bot-protection, 402, or 403 responses to automated clients; access_note flags those cases so Andy can fall back to other sources."
+  },
+  "sources": [
+    {
+      "name": "Vogue",
+      "url": "https://www.vogue.com/",
+      "domain": "vogue.com",
+      "description": "Runway collections, designers, fashion week, street style, celebrity fashion, shopping, and major seasonal trend narratives.",
+      "access_note": "Public site; some content may vary by region or subscription."
+    },
+    {
+      "name": "WWD",
+      "url": "https://wwd.com/",
+      "domain": "wwd.com",
+      "description": "Fashion industry reporting, runway reviews, designers, retail, business, footwear, beauty, and trend analysis.",
+      "access_note": "Live official site; substantial subscriber-only content and automated-access gating may occur."
+    },
+    {
+      "name": "The Business of Fashion",
+      "url": "https://www.businessoffashion.com/",
+      "domain": "businessoffashion.com",
+      "description": "Fashion and luxury industry intelligence, business analysis, retail strategy, fashion week coverage, and market context.",
+      "access_note": "Live official site; subscription and automated-access gating may occur."
+    },
+    {
+      "name": "The Impression",
+      "url": "https://theimpression.com/",
+      "domain": "theimpression.com",
+      "description": "Runway analysis, fashion campaigns, creative direction, seasonal aesthetics, brand imagery, and designer coverage.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Tagwalk",
+      "url": "https://www.tag-walk.com/en/",
+      "domain": "tag-walk.com",
+      "description": "Fashion search engine for runway collections, designers, shows, looks, keywords, colors, and emerging runway patterns.",
+      "access_note": "Public site; some functionality may require account access."
+    },
+    {
+      "name": "Harper's Bazaar",
+      "url": "https://www.harpersbazaar.com/",
+      "domain": "harpersbazaar.com",
+      "description": "Luxury fashion, runway, celebrity style, seasonal trends, accessories, shopping, and designer coverage.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "ELLE",
+      "url": "https://www.elle.com/",
+      "domain": "elle.com",
+      "description": "Runway, shopping, celebrity style, accessories, beauty crossovers, and accessible seasonal fashion trends.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Who What Wear",
+      "url": "https://www.whowhatwear.com/",
+      "domain": "whowhatwear.com",
+      "description": "Shopping-led fashion trends, street style, celebrity looks, wearable styling, products, and emerging consumer trends.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Fashionista",
+      "url": "https://fashionista.com/",
+      "domain": "fashionista.com",
+      "description": "Daily fashion news, designers, fashion week, trend analysis, industry developments, shopping, and career coverage.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Dazed Fashion",
+      "url": "https://www.dazeddigital.com/fashion",
+      "domain": "dazeddigital.com",
+      "description": "Experimental fashion, youth culture, emerging designers, subcultures, provocative styling, and avant-garde aesthetics.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "i-D",
+      "url": "https://i-d.co/",
+      "domain": "i-d.co",
+      "description": "Youth fashion, emerging designers, subcultures, street culture, photography, music, and directional style.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "W Magazine Fashion",
+      "url": "https://www.wmagazine.com/fashion",
+      "domain": "wmagazine.com",
+      "description": "Luxury editorial fashion, designers, runway, celebrity style, red carpet, photography, and directional fashion features.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "The Cut Fashion",
+      "url": "https://www.thecut.com/fashion/",
+      "domain": "thecut.com",
+      "description": "Fashion criticism, cultural interpretation, street style, celebrity fashion, shopping, and trend commentary.",
+      "access_note": "Public site; some articles may be subscriber-only."
+    },
+    {
+      "name": "GQ Style",
+      "url": "https://www.gq.com/style",
+      "domain": "gq.com",
+      "description": "Menswear, tailoring, sneakers, streetwear, celebrity style, shopping, and contemporary fashion trends.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Highsnobiety",
+      "url": "https://www.highsnobiety.com/",
+      "domain": "highsnobiety.com",
+      "description": "Streetwear, sneakers, youth culture, luxury-street crossover, collaborations, emerging labels, and cultural trends.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Hypebeast Fashion",
+      "url": "https://hypebeast.com/fashion",
+      "domain": "hypebeast.com",
+      "description": "Streetwear, sneakers, drops, collaborations, emerging brands, fashion news, and youth-oriented style.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Complex Style",
+      "url": "https://www.complex.com/style",
+      "domain": "complex.com",
+      "description": "Streetwear, sneakers, designers, celebrity style, collaborations, drops, and youth fashion culture.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Footwear News",
+      "url": "https://footwearnews.com/",
+      "domain": "footwearnews.com",
+      "description": "Footwear industry news, shoe trends, sneakers, retail, designers, celebrity footwear, and market analysis.",
+      "access_note": "Live official site; automated-access or subscription gating may occur."
+    },
+    {
+      "name": "Sneaker News",
+      "url": "https://sneakernews.com/",
+      "domain": "sneakernews.com",
+      "description": "Sneaker releases, collaborations, footwear silhouettes, release calendars, brands, and sneaker culture.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Refinery29 Fashion",
+      "url": "https://www.refinery29.com/en-us/fashion",
+      "domain": "refinery29.com",
+      "description": "Accessible fashion, shopping, styling, Gen Z and millennial trends, street style, and inclusive fashion coverage.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "NYLON Fashion",
+      "url": "https://www.nylon.com/fashion",
+      "domain": "nylon.com",
+      "description": "Youth fashion, celebrity style, emerging aesthetics, shopping, pop culture, and trend-driven editorial coverage.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "InStyle Fashion",
+      "url": "https://www.instyle.com/fashion",
+      "domain": "instyle.com",
+      "description": "Celebrity style, wearable fashion trends, shopping, styling advice, red carpet, and accessible wardrobe ideas.",
+      "access_note": "Live official site; automated-access behavior may vary."
+    },
+    {
+      "name": "Marie Claire Fashion",
+      "url": "https://www.marieclaire.com/fashion/",
+      "domain": "marieclaire.com",
+      "description": "Seasonal trends, runway, shopping, celebrity style, accessories, and practical fashion buying guides.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "Glamour Fashion",
+      "url": "https://www.glamour.com/fashion",
+      "domain": "glamour.com",
+      "description": "Wearable trends, celebrity style, shopping, seasonal wardrobes, accessories, and accessible fashion advice.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "The Zoe Report",
+      "url": "https://www.thezoereport.com/fashion",
+      "domain": "thezoereport.com",
+      "description": "Luxury-meets-shopping coverage, street style, celebrity fashion, emerging trends, accessories, and styling.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "FashionNetwork USA",
+      "url": "https://us.fashionnetwork.com/",
+      "domain": "fashionnetwork.com",
+      "description": "Global B2B fashion, luxury, beauty, retail, brand, collection, runway, and industry news.",
+      "access_note": "Live official site; may return anti-bot restrictions to automated clients."
+    },
+    {
+      "name": "Glossy Fashion",
+      "url": "https://www.glossy.co/fashion/",
+      "domain": "glossy.co",
+      "description": "Fashion business, retail strategy, digital culture, consumer behavior, brand marketing, and technology.",
+      "access_note": "Public site; some content may require subscription."
+    },
+    {
+      "name": "Sourcing Journal",
+      "url": "https://sourcingjournal.com/",
+      "domain": "sourcingjournal.com",
+      "description": "Apparel sourcing, materials, manufacturing, sustainability, supply chain, trade, denim, and production innovation.",
+      "access_note": "Live official site; automated-access or subscription gating may occur."
+    },
+    {
+      "name": "SSENSE Editorial",
+      "url": "https://www.ssense.com/en-us/editorial",
+      "domain": "ssense.com",
+      "description": "Avant-garde fashion, designers, cultural criticism, luxury retail, emerging aesthetics, and editorial storytelling.",
+      "access_note": "Public site."
+    },
+    {
+      "name": "NET-A-PORTER PORTER",
+      "url": "https://www.net-a-porter.com/en-us/porter",
+      "domain": "net-a-porter.com",
+      "description": "Luxury shopping combined with fashion editorial, seasonal trend reports, street style, accessories, and styling.",
+      "access_note": "Public site; locale redirects may occur."
+    }
+  ]
+}

@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/playwright:v1.63.0-noble AS build
 WORKDIR /build
 COPY package.json package-lock.json tsconfig.json ./
 RUN npm ci
-COPY scout.ts ./
+COPY scout.ts qa.ts social.ts press.ts ./
 RUN npm run build && npm prune --omit=dev
 
 FROM mcr.microsoft.com/playwright:v1.63.0-noble

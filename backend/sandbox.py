@@ -75,6 +75,8 @@ def _docker_command(run_id: str, run_dir: Path, url: str) -> list[str]:
         "--name", f"mira-scout-{run_id}",
         "--init",
         "--network", SCOUT_NETWORK,
+        # Public resolver: the host's resolv.conf may point at a resolver the container can't reach.
+        "--dns", "1.1.1.1",
         "--read-only",
         "--tmpfs", "/tmp:rw,nosuid,nodev,size=256m",
         "--cap-drop", "ALL",

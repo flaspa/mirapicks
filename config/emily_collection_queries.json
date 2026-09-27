@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "purpose": "Fashion topics for Emily's asynchronous TikTok clipping-book collection through Bright Data.",
+  "defaults": {
+    "posts_per_query": 50,
+    "max_concurrent": 3,
+    "max_unique_clips": 1000
+  },
+  "queries": [
+    {
+      "id": "runway_couture",
+      "query": "runway couture 2026"
+    },
+    {
+      "id": "couture_fashion_week",
+      "query": "couture fashion week"
+    },
+    {
+      "id": "streetwear",
+      "query": "streetwear 2026"
+    },
+    {
+      "id": "genz_fashion",
+      "query": "Gen Z fashion"
+    },
+    {
+      "id": "genz_shoes",
+      "query": "Gen Z shoes"
+    },
+    {
+      "id": "ballet_flats",
+      "query": "ballet flats"
+    },
+    {
+      "id": "mesh_sneakers",
+      "query": "mesh sneakers"
+    },
+    {
+      "id": "kitten_heels",
+      "query": "kitten heels"
+    },
+    {
+      "id": "affordable_fashion",
+      "query": "affordable fashion"
+    },
+    {
+      "id": "budget_outfits",
+      "query": "budget outfits"
+    },
+    {
+      "id": "fashion_dupes",
+      "query": "fashion dupes"
+    },
+    {
+      "id": "fall_fashion",
+      "query": "fall fashion 2026"
+    },
+    {
+      "id": "quiet_luxury",
+      "query": "quiet luxury"
+    },
+    {
+      "id": "sustainable_fashion",
+      "query": "sustainable fashion"
+    }
+  ]
+}
