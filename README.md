@@ -56,6 +56,32 @@ Each container is removed after its run. To see containment in action:
 python -m backend.containment_demo
 ```
 
+## Hackathon requirements coverage
+
+Mira Picks implements all required Challenge 1 technology components.
+
+| Challenge 1 requirement | Mira Picks implementation |
+| :--- | :--- |
+| **Vultr VM backend** | A Vultr VM is the central control plane for FastAPI, agent orchestration, run state, Bright Data integration, sandbox dispatch and publication. |
+| **Web application deployed on Vultr** | The backstage console and public publication are deployed on the Vultr-hosted system at `agents.mirapicks.com` and `www.mirapicks.com`. |
+| **Vultr Serverless Inference for agent reasoning** | Miranda, Andy, Emily, Nigel and Developer all call models through the shared Vultr Serverless Inference client. |
+| **Sandbox isolated from the application process** | Browser execution and Technical QA run in disposable Docker containers outside the FastAPI process. Containers receive no application secrets and are destroyed after each task. |
+
+Mira Picks also implements several strongly recommended elements:
+
+- **Docker as the sandbox boundary**
+- **REST APIs** through FastAPI
+- **Web dashboard** showing the multi-agent execution and evidence flow
+- **Human approval before publication** through the authenticated staging → review → publish workflow
+- **Playwright in Docker** for browser execution and deterministic QA
+
+### Containment demonstration
+
+The repository includes:
+
+```sh
+python -m backend.containment_demo
+
 ## NetBird
 
 Public HTTPS reaches the VM through the NetBird reverse proxy and overlay network. The application services bind only to `127.0.0.1` and the NetBird overlay address. The VM's firewall allows only SSH inbound. No application port is open to the internet.
