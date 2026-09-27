@@ -1,0 +1,23 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Runtime artifacts
+artifacts/*
+!artifacts/.gitkeep
+
+# Editors / OS
+.vscode/
+.DS_Store
+Thumbs.db
