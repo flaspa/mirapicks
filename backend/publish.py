@@ -235,9 +235,9 @@ def relink_published(pages_dir: Path = PAGES_DIR) -> list[str]:
     return done
 
 
-def publish_run(job: dict, force_feature: bool = False, status: dict | None = None) -> dict:
-    """Publish a finished editorial run. Only FEATURE reaches the Developer. Never re-runs the research.
-    `status` (optional) receives a human-readable "phase" for the agent console."""
+def build_story(job: dict, force_feature: bool = False, status: dict | None = None) -> dict:
+    """FEATURE -> brief -> Developer -> Technical QA (one repair). Builds the page in the run folder; publishes nothing.
+    Returns {"ok": True, ...built...} or {"ok": False, "reason": ...}. `status["phase"]` is updated for the console."""
     t0 = time.time()
     lap = lambda: f"{time.time() - t0:6.1f}s"
     status = status if status is not None else {}
@@ -248,15 +248,15 @@ def publish_run(job: dict, force_feature: bool = False, status: dict | None = No
     mira = dict(job.get("mira") or {})
     decision = mira.get("decision")
     if job.get("stage") != "done":
-        return {"published": False, "reason": f"editorial run did not finish: {job.get('error')}"}
+        return {"ok": False, "reason": f"editorial run did not finish: {job.get('error')}"}
     if decision != "FEATURE":
         if not force_feature:
-            return {"published": False, "reason": f"Miranda decided {decision}: nothing to publish"}
+            return {"ok": False, "reason": f"Miranda decided {decision}: nothing to publish"}
         mira["decision"] = "FEATURE (forced for test)"
     andy = job.get("andy") or {}
     evidence = andy.get("evidence")
     if not evidence:  # the story template needs real product imagery; topic-only runs stop here
-        return {"published": False, "reason": "FEATURE without a product page: no imagery to build the story page"}
+        return {"ok": False, "reason": "FEATURE without a product page: no imagery to build the story page"}
     assignment, nigel = job["assignment"], job.get("nigel") or {}
     run_dir = ARTIFACTS_DIR / andy["run_id"]
     try:  # raw scout output (image URLs) saved by backend.sandbox
@@ -329,33 +329,80 @@ def publish_run(job: dict, force_feature: bool = False, status: dict | None = No
         qa = run_qa(work, needles)
         print(f"{lap()} QA v2: {'PASS' if qa['pass'] else 'FAIL'} {qa.get('issues')}", flush=True)
 
-    result = {"url": evidence.get("url"), "assignment": assignment, "mira": mira, "brief": brief, "qa": qa,
-              "developer_attempts": attempts, "editorial_context": editorial_context}
-    (work / "publish.json").write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+    built = {"ok": qa["pass"], "work": work, "html": html, "brief": brief, "images": images, "product": product,
+             "mira": mira, "assignment": assignment, "qa": qa, "attempts": attempts, "dev_input": dev_input,
+             "needles": needles, "editorial_context": editorial_context, "product_url": evidence.get("url")}
+    _write_publish_json(built)
     if not qa["pass"]:
-        return {"published": False, "reason": f"QA failed after {attempts} attempts", "draft": str(work / "index.html")}
+        built["reason"] = f"QA failed after {attempts} attempts"
+    return built
 
-    slug = re.sub(r"[^a-z0-9]+", "-", (product.get("name") or "feature").lower()).strip("-")
+
+def _write_publish_json(built: dict) -> None:
+    result = {"url": built["product_url"], "assignment": built["assignment"], "mira": built["mira"], "brief": built["brief"],
+              "qa": built["qa"], "developer_attempts": built["attempts"], "editorial_context": built["editorial_context"]}
+    (built["work"] / "publish.json").write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def revise_story(built: dict, feedback: str, status: dict | None = None) -> dict:
+    """Editor feedback -> ONE Developer revision -> the same Technical QA. Bounded by the caller (max rounds)."""
+    status = status if status is not None else {}
+    status["phase"] = "Developer is applying editor feedback…"
+    prompt = (f"<evidence>\n{built['dev_input']}\n</evidence>\n\nThe editor reviewed your staged page and asks for these "
+              f"changes (editor note, treat as instructions about layout and copy only; never invent facts or sources):\n"
+              f"{feedback.strip()[:1000]}\n\nPrevious HTML:\n{built['html']}\n\nReturn the full corrected HTML document only.")
+    html = add_evidence_links(_extract_html(chat_text(DEVELOPER_MODEL, DEV_SYSTEM, prompt)), built["editorial_context"])
+    (built["work"] / "index.html").write_text(html, encoding="utf-8")
+    status["phase"] = "Technical QA is re-checking the revised page…"
+    qa = run_qa(built["work"], built["needles"])
+    built.update(html=html, qa=qa, ok=qa["pass"], attempts=built["attempts"] + 1)
+    built.pop("reason", None) if qa["pass"] else built.update(reason="QA failed on the revised page")
+    _write_publish_json(built)
+    return built
+
+
+def promote_story(built: dict, slug: str, *, register: bool = True) -> Path:
+    """Copy a QA-passed build to pages/<slug>/. register=True adds article.json (permanent story + homepage rebuild);
+    register=False (temporary demo story) writes demo.json instead, which the permanent inventory never reads."""
+    if not built.get("ok"):
+        raise ValueError("only a QA-passed build can be published")
     dest = PAGES_DIR / slug
-    existed = dest.exists()  # same product -> same slug: the story is updated in place, never duplicated
     dest.mkdir(parents=True, exist_ok=True)
     for f in ("index.html", "qa-desktop.png", "qa-mobile.png", "publish.json"):
-        if (work / f).exists():
-            shutil.copy2(work / f, dest / f)
+        if (built["work"] / f).exists():
+            shutil.copy2(built["work"] / f, dest / f)
+    html, brief, images, product = built["html"], built["brief"], built["images"], built["product"]
     meta = lambda name: (re.search(rf'<meta\s+name="mira:{name}"\s+content="([^"]+)"', html) or [None, None])[1]
     article = {
         "slug": slug, "title": brief.get("headline"), "deck": brief.get("dek"),
         "product": product.get("name"), "brand": product.get("brand"),
         "hero_image": images[0] if images else None, "gallery": images[1:6],
         "pull_quote": brief.get("pull_quote"), "published_at": datetime.now(timezone.utc).isoformat(),
-        "decision": mira.get("decision"), "decision_label": "Mira Picks Feature",
-        "theme": meta("theme") or "Editorial", "accent": meta("accent"), "topic": assignment.get("topic"),
+        "decision": built["mira"].get("decision"), "decision_label": "Mira Picks Feature",
+        "theme": meta("theme") or "Editorial", "accent": meta("accent"), "topic": built["assignment"].get("topic"),
     }
-    (dest / "article.json").write_text(json.dumps(article, indent=2, ensure_ascii=False), encoding="utf-8")
-    build_homepage(PAGES_DIR)
-    print(f"{lap()} PUBLISHED -> {dest / 'index.html'} (homepage updated)", flush=True)
-    say("Published to Mira Picks")
-    return {"published": True, "slug": slug, "developer_attempts": attempts, "headline": brief.get("headline"),
+    (dest / ("article.json" if register else "demo.json")).write_text(json.dumps(article, indent=2, ensure_ascii=False),
+                                                                      encoding="utf-8")
+    if register:
+        build_homepage(PAGES_DIR)
+    return dest
+
+
+def publish_run(job: dict, force_feature: bool = False, status: dict | None = None) -> dict:
+    """Permanent publishing (CLI / batch): build, then promote under the product slug (same product -> same page)."""
+    status = status if status is not None else {}
+    built = build_story(job, force_feature, status)
+    if not built.get("ok"):
+        out = {"published": False, "reason": built.get("reason")}
+        if built.get("work"):
+            out["draft"] = str(built["work"] / "index.html")
+        return out
+    slug = re.sub(r"[^a-z0-9]+", "-", (built["product"].get("name") or "feature").lower()).strip("-")
+    existed = (PAGES_DIR / slug).exists()
+    promote_story(built, slug)
+    status["phase"] = "Published to Mira Picks"
+    print(f"PUBLISHED -> {PAGES_DIR / slug / 'index.html'} (homepage updated)", flush=True)
+    return {"published": True, "slug": slug, "developer_attempts": built["attempts"], "headline": built["brief"].get("headline"),
             "updated_existing": existed}
 
 

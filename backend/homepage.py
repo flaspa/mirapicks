@@ -100,19 +100,29 @@ def ensure_desk_footer(html: str) -> str:
 # ---------------- Canonical site header, shared by every Pick/story page (the homepage keeps its front-page masthead) ----
 
 HEAD_START, HEAD_END = "<!-- mira-site-header -->", "<!-- /mira-site-header -->"
-HEAD_CSS = """
-.site-header,.site-header *{box-sizing:border-box;margin:0;padding:0;border:0;background:none;}
-.site-header{display:block;position:relative;z-index:100;background:#f5f2ed;border-bottom:1px solid #d9d3ca;
-  padding:18px clamp(20px,4vw,56px);text-align:center;}
-.site-header .mp-masthead{display:inline-block;font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;
-  font-size:clamp(20px,2.2vw,28px);line-height:1.2;letter-spacing:.18em;text-transform:uppercase;color:#111;text-decoration:none;}
-.site-header .mp-masthead:hover{color:#6f6a63;}
+# The canonical publication header is the homepage navigation row (COVER / LATEST / THE DESK).
+# Same values as the original homepage `nav` rules; class-scoped so Developer page CSS cannot restyle it.
+SITE_NAV_LINKS = [("Cover", "/#cover", "cover"), ("Latest", "/#latest", "latest"), ("The Desk", "/#desk", "desk")]
+NAV_CSS = """
+.site-nav,.site-nav *{box-sizing:border-box;margin:0;padding:0;}
+.site-nav{display:block;position:sticky;top:0;z-index:100;background:rgba(245,242,237,.92);backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);border:0;border-top:1px solid #111;border-bottom:1px solid #d9d3ca;}
+.site-nav ul{list-style:none;display:flex;justify-content:center;gap:clamp(18px,4vw,48px);padding:14px clamp(20px,4vw,56px);
+  font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:400;line-height:normal;letter-spacing:.18em;text-transform:uppercase;flex-wrap:wrap;}
+.site-nav li{list-style:none;}
+.site-nav a{color:#111;text-decoration:none;background:none;border:0;letter-spacing:inherit;}
+.site-nav a:hover,.site-nav a.on{color:var(--accent,#b5543a);}
 """
 
 
-def site_header() -> str:
-    return (f'{HEAD_START}\n{DESK_FONTS}\n<style>{HEAD_CSS}</style>\n'
-            f'<header class="site-header"><a class="mp-masthead" href="/">Mira Picks</a></header>\n{HEAD_END}')
+def site_nav(active: str | None = None) -> str:
+    items = "".join(f'<li><a{" class=" + chr(34) + "on" + chr(34) if key == active else ""} href="{href}">{label}</a></li>'
+                    for label, href, key in SITE_NAV_LINKS)
+    return f'<nav class="site-nav" aria-label="Mira Picks sections"><ul>{items}</ul></nav>'
+
+
+def site_header(active: str | None = None) -> str:
+    return f'{HEAD_START}\n{DESK_FONTS}\n<style>{NAV_CSS}</style>\n{site_nav(active)}\n{HEAD_END}'
 
 
 def ensure_site_header(html: str) -> str:
@@ -182,7 +192,37 @@ def _card(a: dict, idx: int) -> str:
       </a>"""
 
 
-def render(articles: list[dict]) -> str:
+# Temporary demo story (authenticated Demo Publish). State lives OUTSIDE the public pages folder.
+DEMO_STATE_DIR = REPO_ROOT / "data" / "demo_state"
+DEMO_LIVE = DEMO_STATE_DIR / "live.json"
+
+
+def load_demo_live() -> dict | None:
+    try:
+        return json.loads(DEMO_LIVE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _live_slot(d: dict | None) -> str:
+    """"Live from the desk": one temporary slot after the permanent hero, only while a demo story is live."""
+    if not d or not d.get("slug"):
+        return ""
+    e = lambda k: escape(str(d.get(k) or ""))
+    img = f'<a class="live-img" href="/{e("slug")}/"><img src="{e("hero_image")}" alt="{e("title")}"></a>' if d.get("hero_image") else ""
+    return f"""
+    <section class="live-desk" id="live" aria-label="Live from the desk">
+      {img}
+      <div class="live-copy">
+        <div class="kicker"><span class="dot"></span>Live from the desk</div>
+        <h2><a href="/{e('slug')}/">{e('title')}</a></h2>
+        <p class="deck">{e('deck')}</p>
+        <a class="read" href="/{e('slug')}/">Read the live story <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </section>"""
+
+
+def render(articles: list[dict], demo: dict | None = None) -> str:
     now = datetime.now(timezone.utc)
     issue_date = now.strftime("%A %d %B %Y").replace(" 0", " ")
     if not articles:
@@ -242,11 +282,6 @@ def render(articles: list[dict]) -> str:
   .masthead a {{ font-family:var(--serif); font-weight:500; font-size:clamp(56px,13vw,196px); line-height:.85;
                  letter-spacing:-.02em; text-transform:uppercase; display:inline-block; }}
   .tagline {{ margin-top:14px; font-family:var(--serif); font-style:italic; font-size:clamp(16px,1.6vw,21px); color:var(--muted); }}
-  nav {{ position:sticky; top:0; z-index:5; background:rgba(245,242,237,.92); backdrop-filter:blur(8px);
-         border-top:1px solid var(--ink); border-bottom:1px solid var(--line); }}
-  nav ul {{ list-style:none; display:flex; justify-content:center; gap:clamp(18px,4vw,48px); padding:14px var(--gutter);
-            font-size:12px; letter-spacing:.18em; text-transform:uppercase; flex-wrap:wrap; }}
-  nav a:hover, nav a.on {{ color:var(--accent); }}
 
   .lead {{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); min-height:86vh; border-bottom:1px solid var(--line); }}
   .lead-img {{ overflow:hidden; background:#e8e3dc; }}
@@ -289,7 +324,13 @@ def render(articles: list[dict]) -> str:
 
   .empty {{ padding:120px var(--gutter); text-align:center; font-family:var(--serif); font-size:32px; }}
 
+  .live-desk {{ display:grid; grid-template-columns:minmax(0,4fr) minmax(0,6fr); gap:clamp(24px,4vw,64px); align-items:center;
+                padding:clamp(40px,5vw,72px) var(--gutter); border-bottom:1px solid var(--line); }}
+  .live-desk .live-img {{ display:block; aspect-ratio:4/5; overflow:hidden; background:#e8e3dc; }}
+  .live-desk .live-copy {{ display:flex; flex-direction:column; }}
+  .live-desk h2 {{ font-family:var(--serif); font-weight:500; font-size:clamp(34px,4vw,60px); line-height:1; margin:18px 0 16px; }}
   @media (max-width: 900px) {{
+    .live-desk {{ grid-template-columns:1fr; }}
     .lead {{ grid-template-columns:1fr; min-height:0; }}
     .lead-img {{ aspect-ratio:4/5; }}
     .grid {{ grid-template-columns:1fr; }}
@@ -305,13 +346,9 @@ def render(articles: list[dict]) -> str:
     <a href="/">Mira Picks</a>
     <p class="tagline">Only the pieces that earn a feature.</p>
   </header>
-  <nav><ul>
-    <li><a class="on" href="#cover">Cover</a></li>
-    <li><a href="#latest">Latest</a></li>
-    <li><a href="#desk">The Desk</a></li>
-  </ul></nav>
+  {site_header("cover")}
   <main>
-    {lead_html}
+    {lead_html}{_live_slot(demo)}
     <div class="section-head" id="latest"><h2>The Edit</h2><span>{len(articles)} feature{'s' if len(articles) != 1 else ''} published</span></div>
     <div class="grid">{more_html}
     </div>
@@ -325,7 +362,7 @@ def render(articles: list[dict]) -> str:
 def build_homepage(pages_dir: Path = PAGES_DIR) -> Path:
     copy_favicons(pages_dir)
     out = pages_dir / "index.html"
-    out.write_text(render(load_articles(pages_dir)), encoding="utf-8")
+    out.write_text(render(load_articles(pages_dir), load_demo_live()), encoding="utf-8")
     return out
 
 

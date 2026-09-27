@@ -193,21 +193,104 @@ def start_run(url: str | None = None, social_url: str | None = None, trend_query
 DEMO_LOCK = threading.Lock()  # one demo publish at a time
 
 
+STAGED: dict[str, dict] = {}  # job_id -> QA-built story awaiting human review (in memory; never public)
+FEEDBACK_MAX = 2
+
+
+def qa_checks(built: dict) -> list[dict]:
+    """Human-readable checklist from the deterministic QA result (same QA as permanent stories)."""
+    import re as _re
+    qa = built.get("qa") or {}
+    m, sh = qa.get("metrics") or {}, (qa.get("metrics") or {}).get("shell") or {}
+    src = _re.search(r'<aside class="mp-src".*?</aside>', built.get("html") or "", _re.S)
+    return [
+        {"label": "Header", "ok": bool(sh.get("header") and all(sh.get("navLinks") or [False]) and all(sh.get("navHrefs") or [False]) and sh.get("navVisible"))},
+        {"label": "Hero", "ok": bool(m.get("imgLoaded") and (m.get("widest") or 0) >= 600 and not m.get("broken"))},
+        {"label": "Main content", "ok": (sh.get("contentChars") or 0) >= 300},
+        {"label": "Evidence links", "ok": bool(src and src.group(0).count("<a ") > 0)},
+        {"label": "Footer", "ok": bool(sh.get("footer"))},
+        {"label": "No overflow", "ok": (m.get("overflowX") or 0) <= 4 and (m.get("mobileOverflow") or 0) <= 4},
+    ]
+
+
+def _stage_update(job: dict, built: dict, ready_phase: str) -> None:
+    pb = job["publish"]
+    pb.update(qa=qa_checks(built), qa_pass=bool(built.get("ok")), qa_issues=(built.get("qa") or {}).get("issues") or [],
+              developer_attempts=built.get("attempts"))
+    if built.get("ok"):
+        pb.update(staged=True, phase=ready_phase, preview=f"/api/demo/preview/{job['id']}")
+    else:
+        pb.update(phase=f"Not ready — {built.get('reason')}. Publish is disabled.")
+
+
 def _demo_publish(job: dict) -> None:
+    """Demo runs: FEATURE -> Developer -> QA -> STAGING (human review). Never publishes by itself."""
     decision = (job.get("mira") or {}).get("decision")
-    job["publish"] = {"phase": "", "decision": decision}
+    job["publish"] = {"phase": "", "decision": decision, "staged": False, "live": False,
+                      "feedback_rounds": 0, "feedback_max": FEEDBACK_MAX}
     if decision != "FEATURE":
-        job["publish"].update(published=False, phase=f"Not published — Miranda returned {decision}")
+        job["publish"].update(phase=f"Not published — Miranda returned {decision}")
         return
     job["stage"] = "publishing"
-    from backend.publish import publish_run  # lazy: publish imports this module
-    finished = dict(job, stage="done")  # publish_run requires a finished editorial run
-    res = publish_run(finished, status=job["publish"])
-    job["publish"].update(res)
-    if res.get("published"):
-        job["publish"]["url"] = f"https://www.mirapicks.com/{res['slug']}/"
-    else:
-        job["publish"]["phase"] = f"Not published — {res.get('reason')}"
+    from backend.publish import build_story  # lazy: publish imports this module
+    built = build_story(dict(job, stage="done"), status=job["publish"])
+    if built.get("work"):
+        STAGED[job["id"]] = built
+    _stage_update(job, built, "Ready for review — staged, not public")
+
+
+def start_feedback(job_id: str, text: str) -> str | None:
+    """One bounded Developer revision from editor feedback, then the same QA. Returns an error string or None."""
+    job, built = RUNS.get(job_id), STAGED.get(job_id)
+    if not job or not built or not job.get("publish"):
+        return "No staged story for this run."
+    pb = job["publish"]
+    if pb.get("live"):
+        return "This story is already live."
+    if pb["feedback_rounds"] >= FEEDBACK_MAX:
+        return f"Feedback limit reached ({FEEDBACK_MAX} rounds)."
+    if not text.strip():
+        return "Feedback is empty."
+    if not DEMO_LOCK.acquire(blocking=False):
+        return "A demo step is already running."
+    pb["feedback_rounds"] += 1
+    job["stage"] = "publishing"
+
+    def work():
+        try:
+            from backend.publish import revise_story
+            revise_story(built, text, status=pb)
+            _stage_update(job, built, "Ready for review — revised and re-checked")
+        except Exception as exc:  # keep the previous staged state readable
+            pb["phase"] = f"Revision failed: {str(exc)[:160]}"
+        finally:
+            job["stage"] = "done"
+            DEMO_LOCK.release()
+    threading.Thread(target=work, daemon=True).start()
+    return None
+
+
+def publish_staged(job_id: str) -> dict:
+    from backend.demo_live import publish_demo
+    job, built = RUNS.get(job_id), STAGED.get(job_id)
+    if not job or not built:
+        raise ValueError("No staged story for this run.")
+    if not built.get("ok"):
+        raise ValueError("QA has not passed; publish is disabled.")
+    state = publish_demo(built, job_id)
+    job["publish"].update(live=True, url=state["url"], slug=state["slug"], phase="Published — demo story is live on Mira Picks")
+    return state
+
+
+def remove_live_demo() -> dict:
+    from backend.demo_live import remove_demo
+    res = remove_demo()
+    if res.get("removed"):
+        for job in RUNS.values():
+            pb = job.get("publish") or {}
+            if pb.get("slug") == res["slug"]:
+                pb.update(live=False, phase="Removed — the publication is restored")
+    return res
 
 
 def start_demo_run(preset: dict) -> str | None:

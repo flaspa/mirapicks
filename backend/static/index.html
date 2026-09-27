@@ -17,6 +17,11 @@
   .brief .row { display: flex; align-items: center; gap: 14px; }
   .brief label { font-family: sans-serif; font-size: 13px; color: #555; white-space: nowrap; }
   .brief .row input { flex: 1; }
+  .qa-list { list-style: none; padding: 0; margin: 4px 0 10px; font-family: sans-serif; font-size: 13px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .qa-list .ok { color: #2d7a46; } .qa-list .no { color: #b3261e; }
+  #publish textarea { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px; border: 1px solid #bbb; font-family: sans-serif; }
+  #publish button { padding: 9px 16px; font-size: 14px; margin: 6px 8px 0 0; }
+  #publish a { color: #8a5a2d; }
   .demo-link { margin: 8px 2px 0; text-align: right; font-family: sans-serif; font-size: 12px; }
   .demo-link a { color: #999; text-decoration: none; cursor: pointer; }
   .demo-link a:hover { color: #555; text-decoration: underline; }
@@ -114,8 +119,10 @@
   <div class="demo hidden" id="demo-panel">
     <h4>Demo mode &middot; Demo publishing enabled</h4>
     <div class="row" id="demo-presets"></div>
+    <div class="row hidden" id="demo-live" style="margin-top:8px">Demo story is live: <a id="demo-live-link" target="_blank" rel="noopener noreferrer"></a>
+      <button type="button" id="demo-remove">Remove Demo Story</button></div>
     <div class="row" style="margin-top:10px"><button id="demo-go">Run Demo Publish</button>
-      <span class="note">Cached social evidence (Emily&rsquo;s demo clip set) &middot; live Andy, Nigel and Miranda &middot; publishes only if Miranda returns FEATURE</span>
+      <span class="note">Cached social evidence (Emily&rsquo;s demo clip set) &middot; live Andy, Nigel and Miranda &middot; FEATURE only &rarr; staged for your review &rarr; you publish</span>
       <a class="note" id="demo-lock" style="cursor:pointer;margin-left:auto">Lock</a></div>
   </div>
 
@@ -173,9 +180,22 @@
   </div>
 
   <div class="card hidden" id="publish" style="margin-bottom:20px">
-    <h2>Developer &rarr; Technical QA &rarr; Publish</h2>
+    <h2>Developer &rarr; Technical QA &rarr; Staging &rarr; Publish</h2>
     <p id="pub-phase" style="font-size:20px"></p>
+    <div id="pub-qa" class="hidden"><h3>Technical QA</h3><ul class="qa-list" id="pub-qa-list"></ul></div>
+    <div id="pub-review" class="hidden">
+      <p style="font-family:sans-serif;font-size:14px"><a id="pub-preview" target="_blank" rel="noopener">Open staging preview &#8599;</a>
+        <span style="color:#777"> &middot; staged, not public</span></p>
+      <h3>Editor / QA feedback <span id="pub-fb-count" style="font-weight:normal;color:#777"></span></h3>
+      <textarea id="pub-fb" maxlength="1000" rows="3" placeholder="e.g. Tighten the dek and move the evidence section higher."></textarea>
+      <div><button type="button" id="pub-fb-go">Apply feedback &amp; re-check</button><button type="button" id="pub-go">Publish Demo Story</button></div>
+    </div>
+    <div id="pub-live" class="hidden" style="font-family:sans-serif;font-size:14px">
+      <p><b>Demo story is live</b> &middot; <a id="pub-live-link" target="_blank" rel="noopener noreferrer">Open live story &#8599;</a></p>
+      <button type="button" id="pub-remove">Remove Demo Story</button>
+    </div>
     <p id="pub-link"></p>
+    <p id="pub-msg" class="err"></p>
   </div>
 
   <div class="card hidden" id="mira" style="margin-bottom:20px">
@@ -349,16 +369,21 @@ function render(run) {
     text("m-rationale", m.rationale);
     text("m-assign", m.assignment_verdict || "—");
   }
-  if (run.demo) {  // Demo Publish runs only
+  if (run.demo) {  // Demo Publish runs only: staging -> review -> publish -> remove
+    CURRENT_DEMO_RUN = run.id || CURRENT_DEMO_RUN;
     $("publish").classList.remove("hidden");
-    const pb = run.publish || {};
-    text("pub-phase", pb.phase || (run.mira ? "" : "Waiting for Miranda's verdict…"));
-    $("pub-link").replaceChildren();
-    if (pb.published && pb.url && /^https:\/\/www\.mirapicks\.com\//.test(pb.url)) {
-      const a = document.createElement("a"); a.href = pb.url; a.target = "_blank"; a.rel = "noopener noreferrer";
-      a.textContent = pb.url;
-      $("pub-link").append(document.createTextNode(pb.updated_existing ? "Story updated in place (same product, same page): " : "New story: "), a);
-    }
+    const pb = run.publish || {}, busy = run.stage !== "done" && run.stage !== "error";
+    text("pub-phase", pb.phase || (run.mira ? "" : "Researching… (Miranda, Andy, Emily, Nigel, Miranda)"));
+    $("pub-qa").classList.toggle("hidden", !(pb.qa || []).length);
+    $("pub-qa-list").replaceChildren(...(pb.qa || []).map((c) => { const li = document.createElement("li"); li.className = c.ok ? "ok" : "no";
+      li.textContent = (c.ok ? "✓ " : "✗ ") + c.label; return li; }));
+    $("pub-review").classList.toggle("hidden", !pb.staged || pb.live);
+    if (pb.preview) $("pub-preview").href = pb.preview;
+    text("pub-fb-count", `(${pb.feedback_rounds || 0} of ${pb.feedback_max || 0} rounds used)`);
+    $("pub-fb-go").disabled = busy || (pb.feedback_rounds || 0) >= (pb.feedback_max || 0);
+    $("pub-go").disabled = busy || !pb.staged || !pb.qa_pass || !!pb.live;
+    $("pub-live").classList.toggle("hidden", !pb.live);
+    if (pb.url && /^https:\/\/www\.mirapicks\.com\//.test(pb.url)) $("pub-live-link").href = pb.url;
   }
 }
 
@@ -479,8 +504,37 @@ function pollRun(id, buttons) {
   poll();
 }
 
+let CURRENT_DEMO_RUN = null;
+async function demoPost(url, body) {
+  const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  let data = {}; try { data = await res.json(); } catch (e) { /* empty */ }
+  return { ok: res.ok, status: res.status, data };
+}
+async function refetchRun() { if (CURRENT_DEMO_RUN) render(await (await fetch("/api/runs/" + CURRENT_DEMO_RUN)).json()); }
+$("pub-fb-go").onclick = async () => {
+  text("pub-msg", ""); const r = await demoPost(`/api/demo/runs/${CURRENT_DEMO_RUN}/feedback`, { text: $("pub-fb").value });
+  if (!r.ok) { text("pub-msg", r.data.detail || "Feedback was not accepted."); return; }
+  $("pub-fb").value = ""; $("pub-go").disabled = true; $("pub-fb-go").disabled = true; pollRun(CURRENT_DEMO_RUN, [$("go"), $("demo-go")]);
+};
+$("pub-go").onclick = async () => {
+  text("pub-msg", ""); $("pub-go").disabled = true;
+  const r = await demoPost(`/api/demo/runs/${CURRENT_DEMO_RUN}/publish`);
+  if (!r.ok) text("pub-msg", r.data.detail || "Publish failed.");
+  await refetchRun(); refreshDemo();
+};
+async function removeDemo() {
+  text("pub-msg", ""); const r = await demoPost("/api/demo/remove");
+  text("pub-msg", r.ok ? (r.data.removed ? `Removed — ${r.data.restore}.` : r.data.message) : (r.data.detail || "Remove failed."));
+  $("pub-msg").style.color = r.ok ? "#2d7a46" : ""; await refetchRun(); refreshDemo();
+}
+$("pub-remove").onclick = removeDemo;
+$("demo-remove").onclick = removeDemo;
+
 async function refreshDemo() {
   const st = await (await fetch("/api/demo/status")).json();
+  $("demo-live").classList.toggle("hidden", !(st.enabled && st.live));
+  if (st.enabled && st.live && /^https:\/\/www\.mirapicks\.com\//.test(st.live.url || "")) {
+    $("demo-live-link").href = st.live.url; $("demo-live-link").textContent = st.live.title || st.live.url; }
   $("demo-panel").classList.toggle("hidden", !st.enabled);
   if (st.enabled) {
     $("demo-unlock").classList.add("hidden");
@@ -518,6 +572,7 @@ $("demo-go").onclick = async () => {
   const body = await res.json();
   if (!res.ok) { text("error", body.detail || "Demo publish failed to start."); $("go").disabled = false; $("demo-go").disabled = false;
     if (res.status === 401) refreshDemo(); return; }
+  CURRENT_DEMO_RUN = body.id;
   pollRun(body.id, [$("go"), $("demo-go")]);
 };
 refreshDemo();

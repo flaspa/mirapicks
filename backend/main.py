@@ -10,11 +10,12 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from backend.orchestrator import RUNS, start_demo_run, start_run
+from backend.orchestrator import (RUNS, STAGED, publish_staged, remove_live_demo, start_demo_run, start_feedback,
+                                  start_run)
 from backend.sandbox import ARTIFACTS_DIR, REPO_ROOT
 
 app = FastAPI(title="Mira Picks")
@@ -102,7 +103,12 @@ class DemoRunRequest(BaseModel):
 @app.get("/api/demo/status")
 def demo_status(request: Request):
     ok = _demo_ok(request)
-    return {"configured": bool(_pin()), "enabled": ok,
+    live = None
+    if ok:
+        from backend.homepage import load_demo_live
+        d = load_demo_live()
+        live = {"slug": d["slug"], "title": d.get("title"), "url": d.get("url")} if d else None
+    return {"configured": bool(_pin()), "enabled": ok, "live": live,
             "presets": [{"id": p["id"], "label": p["label"]} for p in _presets()] if ok else []}
 
 
@@ -214,3 +220,52 @@ def press_sources():
             "sources": [{"name": s.get("name"), "url": s["url"] if str(s.get("url") or "").startswith("https://") else None,
                          "description": s.get("description"), "access_note": s.get("access_note")}
                         for s in reg.get("sources") or []]}
+
+
+# ---------------- Staging -> human review -> Publish Demo Story -> Remove (all require the demo session) ----------------
+
+class FeedbackRequest(BaseModel):
+    text: str
+
+
+def _require_demo(request: Request) -> None:
+    if not _demo_ok(request):
+        raise HTTPException(401, "Demo publishing is locked.")
+
+
+@app.get("/api/demo/preview/{job_id}", include_in_schema=False)
+def demo_preview(job_id: str, request: Request):
+    _require_demo(request)
+    built = STAGED.get(job_id)
+    if not built or not (built["work"] / "index.html").exists():
+        raise HTTPException(404, "No staged story for this run.")
+    html = (built["work"] / "index.html").read_text(encoding="utf-8")
+    # Resolve the page's absolute links/assets against the publication, and keep the preview out of any index.
+    head = '<base href="https://www.mirapicks.com/"><meta name="robots" content="noindex, nofollow">'
+    html = html.replace("<head>", "<head>" + head, 1) if "<head>" in html else head + html
+    return HTMLResponse(html, headers={"X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store"})
+
+
+@app.post("/api/demo/runs/{job_id}/feedback")
+def demo_feedback(job_id: str, req: FeedbackRequest, request: Request):
+    _require_demo(request)
+    err = start_feedback(job_id, req.text[:1000])
+    if err:
+        raise HTTPException(409, err)
+    return {"id": job_id, "accepted": True}
+
+
+@app.post("/api/demo/runs/{job_id}/publish")
+def demo_publish(job_id: str, request: Request):
+    _require_demo(request)
+    try:
+        st = publish_staged(job_id)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc))
+    return {"published": True, "slug": st["slug"], "url": st["url"]}
+
+
+@app.post("/api/demo/remove")
+def demo_remove(request: Request):
+    _require_demo(request)
+    return remove_live_demo()

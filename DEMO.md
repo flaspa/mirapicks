@@ -33,16 +33,17 @@ Public visitors can only run research. To show the full pipeline, use the protec
    ```
 2. On https://agents.mirapicks.com, click **Demo publish** under the topic box and enter the PIN. The panel "Demo mode · Demo publishing enabled" appears. The session lasts 4 hours, and **Lock** ends it.
 3. Choose **Runway / Couture**, **Streetwear / Gen Z** or **Budget Shopping**, then click **Run Demo Publish**.
-4. The stages run live, and each is a real execution:
-   - Miranda writes the assignment.
-   - Andy selects and reads the publications.
-   - Emily reads the cached demo clip set. The console says so, and no live Bright Data is used.
-   - Nigel compares the evidence, and Miranda gives her verdict.
-   - Only if the verdict is FEATURE does the "Developer → Technical QA → Publish" card continue: the brief, then the page, then QA in the sandbox, then publication.
-   - WATCH or PASS shows "Not published — Miranda returned …".
-5. On success the card shows the live story link. Each preset uses a fixed product, so a rehearsal **updates that story in place**. It never adds a duplicate.
+4. The research runs live. Emily uses the cached demo clip set, and the console says so. Then Miranda gives her verdict:
+   - **WATCH or PASS:** the card shows "Not published — Miranda returned …". Nothing is staged. Run another preset.
+   - **FEATURE:** the brief, the Developer page and Technical QA run. The card then shows **Ready for review — staged, not public**, with the QA checklist: Header, Hero, Main content, Evidence links, Footer, No overflow.
+5. Click **Open staging preview ↗**. This is the real page, visible only in your authenticated session and never indexed.
+6. Optionally, type feedback and click **Apply feedback & re-check**. This runs one Developer revision and the same QA again, with at most 2 rounds.
+7. Click **Publish Demo Story**. It appears at `https://www.mirapicks.com/demo-feature-<id>/`, and the homepage gains a **Live from the desk** slot after the hero. No permanent story is touched.
+8. Click **Remove Demo Story**, in the card or in the demo panel. The demo page is archived, and the homepage is restored byte-for-byte to its pre-demo state. Removing again is safe.
 
-A full demo publish takes about 2.5–3 minutes, so plan to cut or speed up the recording.
+Only one demo story can be live at a time.
+
+Research plus staging takes about 2.5–3 minutes, so plan to cut or speed up the recording.
 
 ---
 

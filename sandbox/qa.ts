@@ -42,19 +42,21 @@ async function main(): Promise<void> {
         overflowX: document.documentElement.scrollWidth - window.innerWidth,
         missing: needles.filter((n) => !text.includes(n.toLowerCase())),
         shell: (() => {
-          // Publication shell: canonical header (Mira Picks masthead linking to "/") + content + canonical footer.
-          const header = document.querySelector("header.site-header");
-          const mast = header?.querySelector("a.mp-masthead") as HTMLAnchorElement | null;
-          const r = mast?.getBoundingClientRect();
-          const cs = mast ? getComputedStyle(mast) : null;
+          // Publication shell: canonical navigation header (nav.site-nav: Cover / Latest / The Desk) + content + footer.
+          const header = document.querySelector("nav.site-nav");
+          const links = header ? Array.from(header.querySelectorAll("a")) as HTMLAnchorElement[] : [];
+          const find = (label: string) => links.find((l) => (l.textContent ?? "").trim().toLowerCase() === label);
+          const expect: [string, string][] = [["cover", "/#cover"], ["latest", "/#latest"], ["the desk", "/#desk"]];
+          const r = header?.getBoundingClientRect();
+          const cs = header ? getComputedStyle(header) : null;
           const desk = document.querySelector(".mp-desk"), foot = document.querySelector(".mp-foot");
           const vis = (e: Element | null) => ((e as HTMLElement | null)?.innerText ?? "").replace(/\s+/g, " ").length;
           const chrome = vis(header) + vis(desk) + vis(foot);
           return {
             header: !!header,
-            mastText: /mira picks/i.test(mast?.textContent ?? ""),
-            mastVisible: !!(r && r.width > 0 && r.height > 0 && cs && cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0),
-            mastHome: mast?.getAttribute("href") === "/",
+            navLinks: expect.map(([label]) => !!find(label)),
+            navHrefs: expect.map(([label, href]) => find(label)?.getAttribute("href") === href),
+            navVisible: !!(r && r.width > 0 && r.height > 0 && cs && cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0),
             contentChars: vis(document.body) - chrome,
             footer: !!desk && !!foot && /decided by miranda/i.test(desk?.textContent ?? ""),
           };
@@ -77,10 +79,10 @@ async function main(): Promise<void> {
     if (mobileOverflow > 4) issues.push(`Horizontal overflow of ${mobileOverflow}px on a 390px mobile viewport.`);
     if (desk.missing.length) issues.push(`Required story text missing: ${desk.missing.join("; ")}`);
     const sh = desk.shell;
-    if (!sh.header) issues.push("Publication shell: canonical header (header.site-header) missing.");
-    if (sh.header && !sh.mastText) issues.push("Publication shell: masthead text 'Mira Picks' missing.");
-    if (sh.header && !sh.mastVisible) issues.push("Publication shell: masthead is not visible.");
-    if (sh.header && !sh.mastHome) issues.push("Publication shell: masthead does not link to the publication root '/'.");
+    if (!sh.header) issues.push("Publication shell: canonical navigation header (nav.site-nav) missing.");
+    if (sh.header && !sh.navLinks.every(Boolean)) issues.push("Publication shell: navigation must contain Cover, Latest and The Desk links.");
+    if (sh.header && !sh.navHrefs.every(Boolean)) issues.push("Publication shell: navigation links must point to /#cover, /#latest and /#desk.");
+    if (sh.header && !sh.navVisible) issues.push("Publication shell: navigation header is not visible.");
     if (sh.contentChars < 300) issues.push("Publication shell: no main story/product content between header and footer.");
     if (!sh.footer) issues.push("Publication shell: canonical editorial footer (.mp-desk + .mp-foot, 'Decided by Miranda') missing.");
 
