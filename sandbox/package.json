@@ -1,0 +1,18 @@
+{
+  "name": "mira-scout",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Disposable sandboxed web inspector for Mira Picks",
+  "type": "module",
+  "main": "dist/scout.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "playwright": "1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
